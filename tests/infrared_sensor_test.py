@@ -4,7 +4,7 @@ import board
 
 from adafruit_motorkit import MotorKit
 
-INFRARED_SENSOR = 24
+INFRARED_SENSOR = 25
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(INFRARED_SENSOR, GPIO.IN)
