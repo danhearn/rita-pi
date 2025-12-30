@@ -32,6 +32,8 @@ sudo raspi-config
 
 ### 2. Install Dependencies
 
+Python version 3.11 currently only supported 
+
 ```bash
 cd /home/rita/Documents/GitHub/rita-pi
 pip3 install -r requirements.txt
