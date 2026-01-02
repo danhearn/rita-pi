@@ -7,8 +7,8 @@ class AudioPlayer:
     def __init__(self):
         # Get the absolute path to the sounds directory
         base_dir = Path(__file__).parent.parent
-        self.warning_sound = os.path.join(base_dir, 'sounds', 'warning.mp3')
-        self.success_sound = os.path.join(base_dir, 'sounds', 'success.mp3')
+        self.warning_sound = os.path.join(base_dir, 'sounds', 'warning.wav')
+        self.success_sound = os.path.join(base_dir, 'sounds', 'success.wav')
     
     def play_sound(self, sound_type):
         """Play a sound alert using aplay (ALSA)"""
