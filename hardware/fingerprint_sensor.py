@@ -6,7 +6,7 @@ Simplified interface for UART Capacitive Fingerprint Reader
 import serial
 import time
 import RPi.GPIO as GPIO
-from .audio_alerts import AudioPlayer
+from hardware.audio_alerts import AudioPlayer
 
 # Response codes
 ACK_SUCCESS = 0x00
