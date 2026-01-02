@@ -6,6 +6,7 @@ Simplified interface for UART Capacitive Fingerprint Reader
 import serial
 import time
 import RPi.GPIO as GPIO
+from audio_alerts import AudioPlayer
 
 # Response codes
 ACK_SUCCESS = 0x00
@@ -50,6 +51,8 @@ class FingerprintSensor:
         
         # Set compare level to 5 (moderate - may need tuning)
         self._set_compare_level(5)
+        
+        self.audio_player = AudioPlayer
     
     def _reset_module(self):
         """Reset the fingerprint module"""
@@ -129,12 +132,14 @@ class FingerprintSensor:
         user_count = self.get_user_count()
         
         if user_count >= USER_MAX_CNT:
+            self.audio_player.play_sound("warning")
             return {"success": False, "message": "Fingerprint library is full"}
         
         command_buf = [CMD_ADD_1, 0, user_count + 1, 3, 0]
         r = self._tx_and_rx_cmd(command_buf, 8, 6)
         
         if r == ACK_TIMEOUT:
+            self.audio_player.play_sound("warning")
             return {"success": False, "message": "Timeout waiting for first scan"}
         
         if r == ACK_SUCCESS and self.g_rx_buf[4] == ACK_SUCCESS:
@@ -143,17 +148,21 @@ class FingerprintSensor:
             r = self._tx_and_rx_cmd(command_buf, 8, 6)
             
             if r == ACK_TIMEOUT:
+                self.audio_player.play_sound("warning")
                 return {"success": False, "message": "Timeout waiting for second scan"}
             
             if r == ACK_SUCCESS and self.g_rx_buf[4] == ACK_SUCCESS:
+                self.audio_player.play_sound("success")
                 return {
                     "success": True, 
                     "message": f"Fingerprint registered successfully (ID: {user_count + 1})",
                     "user_id": user_count + 1
                 }
             else:
+                self.audio_player.play_sound("warning")
                 return {"success": False, "message": "Second scan failed"}
         else:
+            self.audio_player.play_sound("warning")
             return {"success": False, "message": "First scan failed - ensure finger is centered on sensor"}
     
     def verify_user(self):
@@ -165,26 +174,32 @@ class FingerprintSensor:
         r = self._tx_and_rx_cmd(command_buf, 8, 5)
         
         if r == ACK_TIMEOUT:
+            self.audio_player.play_sound("warning")
             return {"success": False, "message": "Timeout - no finger detected"}
         
         status = self.g_rx_buf[4] if len(self.g_rx_buf) > 4 else 0xFF
         
         # Check for error codes FIRST
         if status == ACK_NO_USER:
+            self.audio_player.play_sound("warning")
             return {"success": False, "message": "Fingerprint not found in database"}
         elif status == ACK_GO_OUT:
+            self.audio_player.play_sound("warning")
             return {"success": False, "message": "Finger not centered properly - please try again"}
         elif status == 0x00:
+            self.audio_player.play_sound("warning")
             return {"success": False, "message": "No fingerprint detected"}
         
         # Only accept valid user IDs (0x01-0xFE)
         if 0x01 <= status <= 0xFE:
+            self.audio_player.play_sound("success")
             return {
                 "success": True,
                 "message": "Fingerprint verified",
                 "user_id": status
             }
         
+        self.audio_player.play_sound("warning")
         return {"success": False, "message": "Verification failed"}
     
     def clear_all_users(self):
@@ -193,10 +208,13 @@ class FingerprintSensor:
         r = self._tx_and_rx_cmd(command_buf, 8, 5)
         
         if r == ACK_TIMEOUT:
+            self.audio_player.play_sound("warning")
             return {"success": False, "message": "Timeout"}
         if r == ACK_SUCCESS and self.g_rx_buf[4] == ACK_SUCCESS:
+            self.audio_player.play_sound("success")
             return {"success": True, "message": "All fingerprints cleared"}
         else:
+            self.audio_player.play_sound("warning")
             return {"success": False, "message": "Failed to clear fingerprints"}
     
     def cleanup(self):
