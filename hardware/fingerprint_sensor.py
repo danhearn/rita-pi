@@ -48,8 +48,8 @@ class FingerprintSensor:
         # Reset module
         self._reset_module()
         
-        # Set compare level to 7 (stricter - reduces false positives)
-        self._set_compare_level(7)
+        # Set compare level to 5 (moderate - may need tuning)
+        self._set_compare_level(5)
     
     def _reset_module(self):
         """Reset the fingerprint module"""
@@ -127,25 +127,20 @@ class FingerprintSensor:
         Returns: dict with 'success' (bool) and 'message' (str)
         """
         user_count = self.get_user_count()
-        print(f"[REG] Current users: {user_count}")
         
         if user_count >= USER_MAX_CNT:
             return {"success": False, "message": "Fingerprint library is full"}
         
-        print("[REG] Starting registration - place finger on sensor...")
         command_buf = [CMD_ADD_1, 0, user_count + 1, 3, 0]
         r = self._tx_and_rx_cmd(command_buf, 8, 6)
-        print(f"[REG] First scan response: r=0x{r:02X}, g_rx_buf[4]=0x{self.g_rx_buf[4]:02X}")
         
         if r == ACK_TIMEOUT:
             return {"success": False, "message": "Timeout waiting for first scan"}
         
         if r == ACK_SUCCESS and self.g_rx_buf[4] == ACK_SUCCESS:
-            print("[REG] First scan OK, now remove finger and place again...")
             # First scan successful, do second scan
             command_buf[0] = CMD_ADD_3
             r = self._tx_and_rx_cmd(command_buf, 8, 6)
-            print(f"[REG] Second scan response: r=0x{r:02X}, g_rx_buf[4]=0x{self.g_rx_buf[4]:02X}")
             
             if r == ACK_TIMEOUT:
                 return {"success": False, "message": "Timeout waiting for second scan"}
@@ -159,7 +154,6 @@ class FingerprintSensor:
             else:
                 return {"success": False, "message": "Second scan failed"}
         else:
-            print(f"[REG] First scan FAILED: r=0x{r:02X}, g_rx_buf[4]=0x{self.g_rx_buf[4]:02X}")
             return {"success": False, "message": "First scan failed - ensure finger is centered on sensor"}
     
     def verify_user(self):
@@ -170,34 +164,28 @@ class FingerprintSensor:
         command_buf = [CMD_MATCH, 0, 0, 0, 0]
         r = self._tx_and_rx_cmd(command_buf, 8, 5)
         
-        status = self.g_rx_buf[4] if len(self.g_rx_buf) > 4 else 0xFF
-        
         if r == ACK_TIMEOUT:
             return {"success": False, "message": "Timeout - no finger detected"}
         
-        # g_rx_buf[4] contains the status/user_id:
-        # 0x00 = no match, 0x01-0xFE = user ID (if ACK_SUCCESS), 0x05 = ACK_NO_USER, 0x0F = ACK_GO_OUT
+        status = self.g_rx_buf[4] if len(self.g_rx_buf) > 4 else 0xFF
         
-        if r == ACK_SUCCESS:
-            if status == 0x00:
-                return {"success": False, "message": "No fingerprint detected"}
-            elif 0x01 <= status <= 0xFE:
-                # Valid user ID
-                return {
-                    "success": True,
-                    "message": "Fingerprint verified",
-                    "user_id": status
-                }
-            else:
-                return {"success": False, "message": "Finger not centered properly"}
-        
-        # Handle error responses from sensor
+        # Check for error codes FIRST
         if status == ACK_NO_USER:
             return {"success": False, "message": "Fingerprint not found in database"}
         elif status == ACK_GO_OUT:
             return {"success": False, "message": "Finger not centered properly - please try again"}
-        else:
-            return {"success": False, "message": f"Verification failed (error code: 0x{status:02X})"}
+        elif status == 0x00:
+            return {"success": False, "message": "No fingerprint detected"}
+        
+        # Only accept valid user IDs (0x01-0xFE)
+        if 0x01 <= status <= 0xFE:
+            return {
+                "success": True,
+                "message": "Fingerprint verified",
+                "user_id": status
+            }
+        
+        return {"success": False, "message": "Verification failed"}
     
     def clear_all_users(self):
         """Clear all registered fingerprints"""
