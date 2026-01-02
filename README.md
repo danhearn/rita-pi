@@ -1,6 +1,28 @@
-# IoT Pill Dispenser - rita-pi
+# Rita Pill Dispenser - rita-pi
 
-A Raspberry Pi-based IoT pill dispenser with fingerprint authentication, automated dispensing, and hand detection.
+The following two steps will allow you to setup the PI on a new wifi network and run the test environment program:
+
+## Connect to New WiFi Network:
+
+1. On Android or iOS download the `BTBerryWifi` app from the app store. 
+
+2. Turn on the raspberry pi. 
+
+3. On the BTBerryWiFi app scan for devices and select `rita`.
+
+4. Login to your chosen wifi network.
+
+## To run the program:
+
+1. open terminal on the raspberry pi either using a screen keyboard and mouse, through SSH, or Raspberry Pi Connect (ask Dan for login details). 
+2. paste this into the terminal and press enter
+   ```bash
+      bash ~/Documents/GitHub/rita-pi/start-rita.sh
+   ```
+
+The program will start. Navitgate to https://rita-pi-five.vercel.app/ to control the device. 
+   
+# Prototype Documentation
 
 ## Features
 
@@ -21,6 +43,7 @@ A Raspberry Pi-based IoT pill dispenser with fingerprint authentication, automat
 See [HARDWARE_SETUP.md](HARDWARE_SETUP.md) for detailed wiring instructions.
 
 ## Installation
+
 
 ### 1. Enable Required Interfaces
 
@@ -57,11 +80,6 @@ The device connects to your hosted backend and polls for commands:
 
 ```bash
 python3 polling_client.py <backend-url> <device-id> [poll-interval]
-```
-
-**Example:**
-```bash
-python3 polling_client.py https://your-app.com pi-001 5
 ```
 
 **Arguments:**
