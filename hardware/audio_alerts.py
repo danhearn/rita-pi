@@ -1,6 +1,6 @@
 import os
+import subprocess
 from pathlib import Path
-from playsound import playsound
 
 
 class AudioPlayer: 
@@ -11,14 +11,30 @@ class AudioPlayer:
         self.success_sound = os.path.join(base_dir, 'sounds', 'success.mp3')
     
     def play_sound(self, sound_type):
-        """Play a sound alert"""
+        """Play a sound alert using aplay (ALSA)"""
         if sound_type == "warning":
-            if os.path.exists(self.warning_sound):
-                playsound(self.warning_sound)
-            else:
-                print(f"Warning sound file not found: {self.warning_sound}")
+            sound_file = self.warning_sound
         elif sound_type == "success":
-            if os.path.exists(self.success_sound):
-                playsound(self.success_sound)
-            else:
-                print(f"Success sound file not found: {self.success_sound}")
+            sound_file = self.success_sound
+        else:
+            return
+        
+        if not os.path.exists(sound_file):
+            print(f"Sound file not found: {sound_file}")
+            return
+        
+        try:
+            # Use aplay (ALSA player) - more reliable on Raspberry Pi
+            subprocess.Popen(['aplay', sound_file],
+                           stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
+        except FileNotFoundError:
+            # Fallback: try mpg123 if aplay not available
+            try:
+                subprocess.Popen(['mpg123', '-q', sound_file],
+                               stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL)
+            except FileNotFoundError:
+                print("Warning: Neither aplay nor mpg123 found. Install alsa-utils or mpg123.")
+        except Exception as e:
+            print(f"Error playing sound: {e}")
