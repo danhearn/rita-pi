@@ -48,8 +48,8 @@ class FingerprintSensor:
         # Reset module
         self._reset_module()
         
-        # Set compare level to 5 (moderate strictness)
-        self._set_compare_level(5)
+        # Set compare level to 7 (stricter - reduces false positives)
+        self._set_compare_level(7)
     
     def _reset_module(self):
         """Reset the fingerprint module"""
@@ -167,19 +167,30 @@ class FingerprintSensor:
         if r == ACK_TIMEOUT:
             return {"success": False, "message": "Timeout - no finger detected"}
         
-        if r == ACK_SUCCESS and self.g_rx_buf[4] > 0:
-            user_id = self.g_rx_buf[4]
-            return {
-                "success": True,
-                "message": "Fingerprint verified",
-                "user_id": user_id
-            }
-        elif self.g_rx_buf[4] == ACK_NO_USER:
-            return {"success": False, "message": "Fingerprint not found"}
-        elif self.g_rx_buf[4] == ACK_TIMEOUT:
-            return {"success": False, "message": "Timeout"}
+        # g_rx_buf[4] contains the status/user_id:
+        # 0x00 = no match, 0x01-0xFE = user ID (if ACK_SUCCESS), 0x05 = ACK_NO_USER, 0x0F = ACK_GO_OUT
+        status = self.g_rx_buf[4]
+        
+        if r == ACK_SUCCESS:
+            if status == 0x00:
+                return {"success": False, "message": "No fingerprint detected"}
+            elif 0x01 <= status <= 0xFE:
+                # Valid user ID
+                return {
+                    "success": True,
+                    "message": "Fingerprint verified",
+                    "user_id": status
+                }
+            else:
+                return {"success": False, "message": "Finger not centered properly"}
+        
+        # Handle error responses from sensor
+        if status == ACK_NO_USER:
+            return {"success": False, "message": "Fingerprint not found in database"}
+        elif status == ACK_GO_OUT:
+            return {"success": False, "message": "Finger not centered properly - please try again"}
         else:
-            return {"success": False, "message": "Finger not centered properly"}
+            return {"success": False, "message": f"Verification failed (error code: 0x{status:02X})"}
     
     def clear_all_users(self):
         """Clear all registered fingerprints"""
