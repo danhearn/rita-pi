@@ -39,7 +39,7 @@ class FingerprintSensor:
         """Initialize fingerprint sensor"""
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
-        GPIO.setup(FINGER_WAKE_PIN, GPIO.IN)
+        GPIO.setup(FINGER_WAKE_PIN, GPIO.OUT, initial=GPIO.HIGH)  # Keep wake pin HIGH
         GPIO.setup(FINGER_RST_PIN, GPIO.OUT, initial=GPIO.HIGH)
         
         self.ser = serial.Serial(serial_port, baudrate)
@@ -71,6 +71,8 @@ class FingerprintSensor:
         tx_buf.append(checksum)
         tx_buf.append(CMD_TAIL)
         
+        print(f"[DEBUG _tx_and_rx_cmd] Sending: {[f'0x{b:02X}' for b in tx_buf]}")
+        
         self.ser.reset_input_buffer()
         self.ser.write(tx_buf)
         
@@ -80,6 +82,8 @@ class FingerprintSensor:
         while time.time() - start < timeout and len(self.g_rx_buf) < rx_bytes_need:
             if self.ser.in_waiting:
                 self.g_rx_buf.extend(self.ser.read(self.ser.in_waiting))
+        
+        print(f"[DEBUG _tx_and_rx_cmd] Received ({len(self.g_rx_buf)} bytes): {[f'0x{b:02X}' for b in self.g_rx_buf]}")
         
         if len(self.g_rx_buf) != rx_bytes_need:
             return ACK_TIMEOUT
