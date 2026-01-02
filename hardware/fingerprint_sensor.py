@@ -127,12 +127,14 @@ class FingerprintSensor:
         Returns: dict with 'success' (bool) and 'message' (str)
         """
         user_count = self.get_user_count()
+        print(f"[DEBUG add_user] Current user count: {user_count}")
         
         if user_count >= USER_MAX_CNT:
             return {"success": False, "message": "Fingerprint library is full"}
         
         command_buf = [CMD_ADD_1, 0, user_count + 1, 3, 0]
         r = self._tx_and_rx_cmd(command_buf, 8, 6)
+        print(f"[DEBUG add_user] First scan: r=0x{r:02X}, buffer={[f'0x{b:02X}' for b in self.g_rx_buf]}")
         
         if r == ACK_TIMEOUT:
             return {"success": False, "message": "Timeout waiting for first scan"}
@@ -141,6 +143,7 @@ class FingerprintSensor:
             # First scan successful, do second scan
             command_buf[0] = CMD_ADD_3
             r = self._tx_and_rx_cmd(command_buf, 8, 6)
+            print(f"[DEBUG add_user] Second scan: r=0x{r:02X}, buffer={[f'0x{b:02X}' for b in self.g_rx_buf]}")
             
             if r == ACK_TIMEOUT:
                 return {"success": False, "message": "Timeout waiting for second scan"}
@@ -164,12 +167,15 @@ class FingerprintSensor:
         command_buf = [CMD_MATCH, 0, 0, 0, 0]
         r = self._tx_and_rx_cmd(command_buf, 8, 5)
         
+        # DEBUG
+        status = self.g_rx_buf[4] if len(self.g_rx_buf) > 4 else 0xFF
+        print(f"[DEBUG verify_user] r=0x{r:02X}, buffer={[f'0x{b:02X}' for b in self.g_rx_buf]}, status=0x{status:02X}")
+        
         if r == ACK_TIMEOUT:
             return {"success": False, "message": "Timeout - no finger detected"}
         
         # g_rx_buf[4] contains the status/user_id:
         # 0x00 = no match, 0x01-0xFE = user ID (if ACK_SUCCESS), 0x05 = ACK_NO_USER, 0x0F = ACK_GO_OUT
-        status = self.g_rx_buf[4]
         
         if r == ACK_SUCCESS:
             if status == 0x00:
