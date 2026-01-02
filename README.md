@@ -132,24 +132,6 @@ rita-pi/
 ## Example Frontend Integration
 
 ```javascript
-// Unlock device
-const unlock = async () => {
-  const response = await fetch('http://raspberry-pi:8000/unlock', {
-    method: 'POST'
-  });
-  const data = await response.json();
-  console.log(data.message);
-};
-
-// Dispense pill
-const dispensePill = async (motorId, segment) => {
-  const response = await fetch('http://raspberry-pi:8000/dispense', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ motor_id: motorId, segment: segment })
-  });
-  return await response.json();
-};
 
 // Wpolling_client.py          # Main polling client
 ├── requirements.txt
