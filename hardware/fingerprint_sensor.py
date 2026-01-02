@@ -6,7 +6,7 @@ Simplified interface for UART Capacitive Fingerprint Reader
 import serial
 import time
 import RPi.GPIO as GPIO
-from audio_alerts import AudioPlayer
+from .audio_alerts import AudioPlayer
 
 # Response codes
 ACK_SUCCESS = 0x00
@@ -52,7 +52,7 @@ class FingerprintSensor:
         # Set compare level to 5 (moderate - may need tuning)
         self._set_compare_level(5)
         
-        self.audio_player = AudioPlayer
+        self.audio_player = AudioPlayer()
     
     def _reset_module(self):
         """Reset the fingerprint module"""
