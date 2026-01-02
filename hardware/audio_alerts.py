@@ -24,17 +24,12 @@ class AudioPlayer:
             return
         
         try:
-            # Use aplay (ALSA player) - more reliable on Raspberry Pi
-            subprocess.Popen(['aplay', sound_file],
+            # Use the headphone jack (bcm2835 Headphones)
+            # plughw handles format conversions automatically
+            subprocess.Popen(['aplay', '-D', 'plughw:CARD=Headphones,DEV=0', sound_file],
                            stdout=subprocess.DEVNULL,
                            stderr=subprocess.DEVNULL)
         except FileNotFoundError:
-            # Fallback: try mpg123 if aplay not available
-            try:
-                subprocess.Popen(['mpg123', '-q', sound_file],
-                               stdout=subprocess.DEVNULL,
-                               stderr=subprocess.DEVNULL)
-            except FileNotFoundError:
-                print("Warning: Neither aplay nor mpg123 found. Install alsa-utils or mpg123.")
+            print("Error: aplay not found. Install alsa-utils: sudo apt-get install alsa-utils")
         except Exception as e:
             print(f"Error playing sound: {e}")
