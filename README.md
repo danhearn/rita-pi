@@ -83,7 +83,7 @@ python3 polling_client.py <backend-url> <device-id> [poll-interval]
 ```
 
 **Arguments:**
-- `backend-url`: Your hosted backend URL (e.g., https://your-app.com)
+- `backend-url`: Your hosted backend URL [(testing-app)](https://rita-pi-five.vercel.app/)
 - `device-id`: Unique identifier for this device (e.g., pi-001)
 - `poll-interval`: How often to check for commands in seconds (default: 5)
 
