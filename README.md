@@ -42,7 +42,7 @@ The program will start. Navitgate to https://rita-pi-five.vercel.app/ to control
 
 See [HARDWARE_SETUP.md](HARDWARE_SETUP.md) for detailed wiring instructions.
 
-## Installation
+## Installation on a New Raspberry Pi
 
 
 ### 1. Enable Required Interfaces
@@ -55,7 +55,7 @@ sudo raspi-config
 
 ### 2. Install Dependencies
 
-Python version 3.11 currently only supported 
+Python version 3.11 currently only supported. Use PyEnv to create a virtual environment with 3.11.
 
 ```bash
 cd /home/rita/Documents/GitHub/rita-pi
