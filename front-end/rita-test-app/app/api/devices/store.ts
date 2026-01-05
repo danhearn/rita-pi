@@ -1,3 +1,5 @@
+//TODO: convert to Zustand store
+
 export const CommandNames = [
   "unlock",
   "lock",

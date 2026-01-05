@@ -131,9 +131,9 @@ export default function Home() {
       <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-10">
         <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-indigo-600">Rita Pi Prototype</p>
-            <h1 className="text-3xl font-bold">Pill Dispenser Control</h1>
-            <p className="text-sm text-zinc-600">Single-device, in-memory API + UI on Next.js</p>
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Rita Pi</p>
+            <h1 className="text-3xl font-bold">Rita Test Environment</h1>
+            <p className="text-sm text-zinc-600">For controlling and debugging Rita devices</p>
           </div>
           <div className="flex items-center gap-2">
             <label className="text-sm text-zinc-700" htmlFor="deviceId">
