@@ -128,27 +128,3 @@ rita-pi/
 ├── HARDWARE_SETUP.md          # Detailed hardware guide
 └── README.md
 ```
-
-## Example Frontend Integration
-
-```javascript
-
-// Wpolling_client.py          # Main polling client
-├── requirements.txt
-├── HARDWARE_SETUP.md          # Detailed hardware guide
-├── BACKEND_API.md             # Backend API specification
-└── README.mdCheck sensor orientation and distance
-
-## License
-
-MIT
-
-## Author
-User** receives notification from your app to take pill
-2. **Backend** queues command: `{command: "unlock"}`
-3. **Pi** polls backend, receives unlock command
-4. **Pi** waits for fingerprint, unlocks device, sends status back
-5. **Backend** queues dispense command: `{command: "dispense", params: {motor_id: 1, segment: 5}}`
-6. **Pi** dispenses pill and waits for hand detection
-7. **Pi** sends status back: `{status_type: "pill_taken", data: {taken: true}}`
-8. **Backend** updates your app UI: "Pill taken ✓"
